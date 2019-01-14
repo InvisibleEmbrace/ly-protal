@@ -302,7 +302,42 @@
             </div>
             <div class="goods-list">
                 <ul class="yui3-g">
-                    <li class="yui3-u-1-5">
+                    <li class="yui3-u-1-5" v-for="goods in goodsList" :key="goods.id">
+                        <div class="list-wrap">
+                            <div class="p-img">
+                                <a href="item.html" target="_blank"><img :src="goods.selected.images" height="200"/></a>
+                                <ul class="skus">
+                                    <li :class="{selected: sku.id === goods.selected.id}"  v-for="sku in goods.skus" :key="sku.id"  @mouseenter="goods.selected=sku">
+                                        <img :src="sku.images">
+                                    </li>
+                                 <!--   <li class=""><img src="img/_/mobile01.png"></li>
+                                    <li class=""><img src="img/_/mobile01.png"></li>-->
+                                </ul>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="price">
+                                <strong>
+                                    <em>¥</em>
+                                    <i>{{ly.formatPrice(goods.selected.price)}}</i>
+                                </strong>
+                            </div>
+                            <div class="attr">
+                                <em>{{goods.selected.title.length > 20 ? goods.selected.title.substring(0,20) + "..." : goods.selected.title}}</em>
+                            </div>
+                            <div class="cu">
+                                <em><span>促</span>{{goods.subTitle.length > 20 ? goods.subTitle.substring(0,20) + "..." : goods.subTitle}}</em>
+                            </div>
+                            <div class="commit">
+                                <i class="command">已有2000人评价</i>
+                            </div>
+                            <div class="operate">
+                                <a href="success-cart.html" target="_blank" class="sui-btn btn-bordered btn-danger">加入购物车</a>
+                                <a href="javascript:void(0);" class="sui-btn btn-bordered">对比</a>
+                                <a href="javascript:void(0);" class="sui-btn btn-bordered">关注</a>
+                            </div>
+                        </div>
+                    </li>
+                   <!-- <li class="yui3-u-1-5">
                         <div class="list-wrap">
                             <div class="p-img">
                                 <a href="item.html" target="_blank"><img src="img/_/mobile01.png" height="200"/></a>
@@ -598,40 +633,7 @@
                                 <a href="javascript:void(0);" class="sui-btn btn-bordered">关注</a>
                             </div>
                         </div>
-                    </li>
-                    <li class="yui3-u-1-5">
-                        <div class="list-wrap">
-                            <div class="p-img">
-                                <a href="item.html" target="_blank"><img src="img/_/mobile01.png" height="200"/></a>
-                                <ul class="skus">
-                                    <li class="selected"><img src="img/_/mobile01.png"></li>
-                                    <li class=""><img src="img/_/mobile01.png"></li>
-                                    <li class=""><img src="img/_/mobile01.png"></li>
-                                </ul>
-                            </div>
-                            <div class="clearfix"></div>
-                            <div class="price">
-                                <strong>
-                                    <em>¥</em>
-                                    <i>6088.00</i>
-                                </strong>
-                            </div>
-                            <div class="attr">
-                                <em>Apple苹果iPhone 6s (A1699)</em>
-                            </div>
-                            <div class="cu">
-                                <em><span>促</span>满一件可参加超值换购</em>
-                            </div>
-                            <div class="commit">
-                                <i class="command">已有2000人评价</i>
-                            </div>
-                            <div class="operate">
-                                <a href="success-cart.html" target="_blank" class="sui-btn btn-bordered btn-danger">加入购物车</a>
-                                <a href="javascript:void(0);" class="sui-btn btn-bordered">对比</a>
-                                <a href="javascript:void(0);" class="sui-btn btn-bordered">关注</a>
-                            </div>
-                        </div>
-                    </li>
+                    </li>-->
                 </ul>
             </div>
             <div class="fr">
@@ -760,8 +762,42 @@
     var vm = new Vue({
         el: "#searchApp",
         data: {
+            search:{
+                key:"" // 搜索页面的关键
+            },
+            goodsList:[],
+            ly // 因为在Vue范围内使用任何变量，都会默认去Vue实例中寻找，我们使用ly，但是Vue实例中没有这个变量。所以解决办法就是把ly记录到Vue实例：
         },
+        created() {
+            // 判断是否有请求参数
+            if(!location.search){
+                return;
+            }
+            // 将请求参数转为对象
+            const search = ly.parse(location.search.substring(1));
+            // 记录在data的search对象中
+            this.search = search;
 
+            // 发起请求，根据条件搜索
+            this.searchFromServer();
+        },
+        methods:{
+            searchFromServer(){
+                // 发起异步请求
+                ly.http.post("/search/page",this.search)
+                    .then(({data}) => {
+
+                        //初始化sku
+                        data.items.forEach(goods => {
+                            // 把字符串格式化传json
+                            goods.skus = JSON.parse(goods.skus);
+                            // 初始化第一个被选中
+                            goods.selected = goods.skus[0];
+                        })
+                        this.goodsList = data.items;
+                    })
+            }
+        },
         components:{
             lyTop: () => import("./js/pages/top.js")
         }
