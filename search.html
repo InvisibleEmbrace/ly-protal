@@ -208,13 +208,11 @@
                                 <div class="p-img">
                                     <a :href="'/item/'+goods.id+'.html'" target="_blank">
                                         <!--展示图片有bug，什么时候出现bug？当一个sku有多个图片时-->
-                                        <!--老师的代码是images，实际后台传的是image-->
-                                        <img :src="goods.selected.image" height="200"/></a>
+                                        <img :src="goods.selected.images" height="200"/></a>
                                     <ul class="skus">
                                         <li :class="{selected: sku.id===goods.selected.id}" v-for="sku in goods.skus"
                                             :key="sku.id" @mouseover="goods.selected=sku">
-                                            <!--老师的代码是images，实际后台传的是image-->
-                                            <img :src="sku.image"></li>
+                                            <img :src="sku.images"></li>
                                     </ul>
                                 </div>
                                 <div class="clearfix"></div>
